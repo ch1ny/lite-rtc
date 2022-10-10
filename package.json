@@ -1,7 +1,7 @@
 {
 	"name": "lite-rtc",
 	"version": "0.0.0",
-	"main": "index.js",
+	"main": "dist/index.js",
 	"author": "德布罗煜",
 	"license": "MIT",
 	"description": "一款轻量的 WebRTC 封装库",
