@@ -41,7 +41,7 @@ export class WebRtc {
 	private _candidateQueue?: Array<RTCIceCandidateInit>;
 
 	constructor(props: IWebRtcConstructorProps) {
-		if (WebRtc.noWebRtc || !RTCPeerConnection) return WebRtc.noWebRtc;
+		if (!RTCPeerConnection) return WebRtc.noWebRtc;
 
 		this._rtc = this.buildPeer(props);
 	}
