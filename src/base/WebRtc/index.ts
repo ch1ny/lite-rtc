@@ -8,9 +8,9 @@ const RTCPeerConnection =
 const RTCSessionDescription =
 	window.RTCSessionDescription || (<any>window).mozRTCSessionDescription;
 
-type TPreBuildRTCPeerConnection = (peer: RTCPeerConnection) => void;
+export type TPreBuildRTCPeerConnection = (peer: RTCPeerConnection) => void;
 
-interface IWebRtcConstructorProps {
+export interface IWebRtcConstructorProps {
 	rtcConfiguration?: RTCConfiguration;
 	onIceCandidate?: (candidate: RTCIceCandidate) => void;
 	onTrack?: (track: MediaStreamTrack) => void;
@@ -40,7 +40,7 @@ export class WebRtc {
 	private _status: TWebRtcStatus = 'free';
 	private _candidateQueue?: Array<RTCIceCandidateInit>;
 
-	constructor(props: IWebRtcConstructorProps) {
+	constructor(props?: IWebRtcConstructorProps) {
 		if (!RTCPeerConnection) return WebRtc.noWebRtc;
 
 		this._rtc = this.buildPeer(props);
@@ -155,17 +155,17 @@ export class WebRtc {
 	}
 
 	addIceCandidate(candidate: RTCIceCandidateInit) {
-		this._candidateQueue = this._candidateQueue || [];
 		if (candidate.candidate) {
 			if (this.rtc.signalingState === 'stable') {
 				this.rtc.addIceCandidate(candidate);
 			} else {
+				this._candidateQueue = this._candidateQueue || [];
 				this._candidateQueue.push(candidate);
 			}
 		}
 	}
 
-	private buildPeer(props: IWebRtcConstructorProps): RTCPeerConnection {
+	private buildPeer(props: IWebRtcConstructorProps = {}): RTCPeerConnection {
 		const {
 			rtcConfiguration,
 			onIceCandidate,

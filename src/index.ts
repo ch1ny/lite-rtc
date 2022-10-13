@@ -1,1 +1,2 @@
-export { WebRtc } from './base';
+export * from './base';
+export * from './types';
