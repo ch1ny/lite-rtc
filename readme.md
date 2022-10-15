@@ -30,10 +30,6 @@ Lite RTC 是一款轻量级的 WebRTC 封装库，旨在为开发者提供更加
 npm i --save lite-rtc
 ```
 
-```js
-import LiteRTC from 'lite-rtc'
-```
-
 ### WebRTC 基础
 
 `lite-rtc` 旨在为开发者提供最基本的 API 封装使用，但我们后续也会开发一部分定制化场景下的一站式功能。但是现在我们还是先通过最基本的几个 API 来学习 `lite-rtc` 的用法吧。
