@@ -1,6 +1,6 @@
 {
 	"name": "lite-rtc",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"main": "dist/index.js",
 	"author": "德布罗煜",
 	"license": "MIT",
@@ -22,15 +22,10 @@
 		"prepublishOnly": "npm run build"
 	},
 	"devDependencies": {
-		"browserify": "^17.0.0",
 		"gulp": "^4.0.2",
 		"gulp-clean": "^0.4.0",
 		"gulp-typescript": "^6.0.0-alpha.1",
-		"gulp-uglify": "^3.0.2",
-		"tsify": "^5.0.4",
 		"typescript": "^4.8.4",
-		"vinyl-buffer": "^1.0.1",
-		"vinyl-source-stream": "^2.0.0",
 		"webpack": "^5.74.0",
 		"webpack-stream": "^7.0.0"
 	},
