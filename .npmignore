@@ -1,7 +1,16 @@
-node_modules
+.vscode/
 
-scripts
+docs/
+demo/
 
-src
+node_modules/
+src/
+
+.gitignore
+
+yarn.lock
+yarn-error.log
 
 gulpfile.js
+
+tsconfig.json
