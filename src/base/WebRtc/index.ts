@@ -1,4 +1,4 @@
-import { TWebRtcStatus } from '../../types';
+import { TWebRtcStatus } from '@/types';
 import { UnexpectedWebRtcStatusError } from './errors';
 
 const RTCPeerConnection =
@@ -8,7 +8,7 @@ const RTCPeerConnection =
 const RTCSessionDescription =
 	window.RTCSessionDescription || (<any>window).mozRTCSessionDescription;
 
-export type TPreBuildRTCPeerConnection = (peer: RTCPeerConnection) => void;
+export type TPreBuildRTCPeerConnection = (peer: RTCPeerConnection) => void | Promise<void>;
 
 export interface IWebRtcConstructorProps {
 	rtcConfiguration?: RTCConfiguration;
@@ -40,10 +40,10 @@ export class WebRtc {
 	private _status: TWebRtcStatus = 'free';
 	private _candidateQueue?: Array<RTCIceCandidateInit>;
 
-	constructor(props?: IWebRtcConstructorProps) {
+	constructor(private props?: IWebRtcConstructorProps) {
 		if (!RTCPeerConnection) return WebRtc.noWebRtc;
 
-		this._rtc = this.buildPeer(props);
+		this._rtc = this.buildPeer();
 	}
 
 	async createOffer(options?: RTCOfferOptions, preConnection?: TPreBuildRTCPeerConnection) {
@@ -54,7 +54,9 @@ export class WebRtc {
 
 		this.setStatus('offering');
 
-		preConnection?.(this.rtc);
+		if (!!preConnection) {
+			await preConnection(this.rtc);
+		}
 
 		const result = await this.rtc
 			.createOffer(options)
@@ -103,7 +105,9 @@ export class WebRtc {
 		}
 		this._candidateQueue = undefined;
 
-		preConnection?.(this.rtc);
+		if (!!preConnection) {
+			await preConnection(this.rtc);
+		}
 
 		const result = await this.rtc
 			.createAnswer(options)
@@ -121,7 +125,6 @@ export class WebRtc {
 		if (result.success) {
 			const { sdp } = result;
 			this.rtc.setLocalDescription(sdp);
-			this.setStatus('connected');
 		} else {
 			this.setStatus('free');
 		}
@@ -141,8 +144,6 @@ export class WebRtc {
 				type: 'answer',
 			})
 		);
-
-		this.setStatus('free');
 	}
 
 	disconnect() {
@@ -150,8 +151,9 @@ export class WebRtc {
 			throw new UnexpectedWebRtcStatusError(this.status, 'connected');
 
 		this.rtc.close();
-		this.setStatus('free');
 		this._candidateQueue = undefined;
+		this.setStatus('free');
+		this.props?.onConnectionStateChange?.onDisconnected?.();
 	}
 
 	addIceCandidate(candidate: RTCIceCandidateInit) {
@@ -165,14 +167,14 @@ export class WebRtc {
 		}
 	}
 
-	private buildPeer(props: IWebRtcConstructorProps = {}): RTCPeerConnection {
+	private buildPeer(): RTCPeerConnection {
 		const {
 			rtcConfiguration,
 			onIceCandidate,
 			onTrack,
 			onConnectionStateChange,
 			onIceConnectionStateChange,
-		} = props;
+		} = this.props || {};
 
 		const peer = new RTCPeerConnection(rtcConfiguration);
 
@@ -198,12 +200,17 @@ export class WebRtc {
 					case 'new':
 						return onNew?.();
 					case 'failed':
+						this.setStatus('free');
 						return onFailed?.();
 					case 'connecting':
 						return onConnecting?.();
 					case 'connected':
+						this.setStatus('connected');
 						return onConnected?.();
 					case 'disconnected':
+						this.rtc.close();
+						this._candidateQueue = undefined;
+						this.setStatus('free');
 						return onDisconnected?.();
 					case 'closed':
 						return onClosed?.();
@@ -212,15 +219,8 @@ export class WebRtc {
 		}
 
 		if (onIceConnectionStateChange) {
-			const {
-				onNew,
-				onFailed,
-				onChecking,
-				onConnected,
-				onDisconnected,
-				onCompleted,
-				onClosed,
-			} = onIceConnectionStateChange;
+			const { onNew, onFailed, onChecking, onConnected, onDisconnected, onCompleted, onClosed } =
+				onIceConnectionStateChange;
 
 			peer.oniceconnectionstatechange = () => {
 				const { iceConnectionState } = peer;

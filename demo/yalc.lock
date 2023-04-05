@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "packages": {
+    "lite-rtc": {
+      "signature": "0333c01b7fdfd32c0bea2bc62299de29",
+      "file": true
+    }
+  }
+}

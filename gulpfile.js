@@ -1,6 +1,9 @@
 const gulp = require('gulp');
 const ts = require('gulp-typescript');
 const clean = require('gulp-clean');
+const sourcemaps = require('gulp-sourcemaps');
+const alias = require('@gulp-plugin/alias');
+const path = require('path');
 const webpack = require('webpack');
 const gulpWebpack = require('webpack-stream');
 
@@ -11,7 +14,17 @@ gulp.task('clean', function () {
 });
 
 gulp.task('tsc', function () {
-	return tsProject.src().pipe(tsProject()).pipe(gulp.dest('dist'));
+	return tsProject
+		.src()
+		.pipe(alias(tsProject.config))
+		.pipe(sourcemaps.init())
+		.pipe(tsProject())
+		.pipe(
+			sourcemaps.write({
+				sourceRoot: (file) => path.relative(path.join(file.cwd, file.path), file.base),
+			})
+		)
+		.pipe(gulp.dest('dist'));
 });
 
 gulp.task('build-umd', () => {
